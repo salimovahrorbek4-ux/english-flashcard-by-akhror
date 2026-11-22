@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Inglizcha–O'zbekcha so'zlarni qo'shish, fayldan yuklash va yodlash uchun Netlify'ga moslashtirilgan flashcard ilovasi." />
+  <title>Inglizcha–O'zbekcha Flashcardlar | Netlify</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-2: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: rgba(148, 163, 184, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 60px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(34, 197, 94, 0.14);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .stat-card .label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .stat-card .value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .panel h2 {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: transform 0.12s ease, opacity 0.15s ease;
+    }
+
+    button:hover {
+      opacity: 0.92;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #082f49;
+    }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #052e16;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .dropzone {
+      border: 2px dashed rgba(56, 189, 248, 0.45);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      background: rgba(15, 23, 42, 0.55);
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .preview-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .preview-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .flashcard-stage {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .card-box {
+      max-width: 540px;
+      min-height: 210px;
+      margin: 14px auto;
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 14px;
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .card-tag {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .card-main {
+      font-size: 1.85rem;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .card-sub {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .word-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .word-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .word-item.learned {
+      border-color: rgba(34, 197, 94, 0.45);
+      background: rgba(34, 197, 94, 0.06);
+    }
+
+    .word-en {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .word-uz {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+
+    .word-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0284c7;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Flashcardlar — Inglizcha &amp; O'zbekcha</h1>
+        <p class="hint">Har bir so'z va tarjima brauzerda avtomatik saqlanadi (qayta kirganda o'chmaydi).</p>
+      </div>
+      <div class="status-badge" id="saveStatus">✓ Xotirada saqlangan</div>
+    </header>
+
+    <section class="stats">
+      <div class="stat-card">
+        <div class="label">Jami so'zlar</div>
+        <div class="value" id="statTotal">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Yodlangan</div>
+        <div class="value" id="statLearned" style="color: var(--success);">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Qolgan</div>
+        <div class="value" id="statRemaining" style="color: var(--warning);">0</div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <h2>Yangi so'z qo'shish</h2>
+        <form id="addWordForm">
+          <div class="form-group">
+            <label for="enInput">Inglizcha so'z *</label>
+            <input type="text" id="enInput" placeholder="masalan: apple" required />
+          </div>
+          <div class="form-group">
+            <label for="uzInput">O'zbekcha tarjimasi *</label>
+            <input type="text" id="uzInput" placeholder="masalan: olma" required />
+          </div>
+          <div class="form-group">
+            <label for="exampleInput">Misol gap (ixtiyoriy)</label>
+            <input type="text" id="exampleInput" placeholder="masalan: I eat an apple every day." />
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn-primary">+ Qo'shish</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Fayl orqali yuklash (.txt / .csv)</h2>
+        <div class="dropzone" id="dropzone">
+          <div><strong>.txt yoki .csv faylni tanlang yoki shu yerga tashlang</strong></div>
+          <div class="hint">Masalan: <code>apple                 olma</code></div>
+          <input type="file" id="fileInput" accept=".txt,.csv" hidden />
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn-secondary" id="sampleBtn">⬇ Namuna .txt</button>
+          <button type="button" class="btn-secondary" id="exportBtn">⬆ Eksport (.txt)</button>
+          <button type="button" class="btn-success" id="applyImportBtn" style="display: none;">✓ Yuklanganlarni qo'shish</button>
+        </div>
+
+        <div class="preview-box" id="previewBox"></div>
+      </div>
+    </section>
+
+    <section class="flashcard-stage">
+      <div class="toolbar">
+        <span class="hint" id="cardCounter">Karta 0 / 0</span>
+        <div class="btn-row" style="margin: 0;">
+          <button type="button" class="btn-secondary" id="speakBtn">🔊 Talaffuz</button>
+          <button type="button" class="btn-secondary" id="toggleLearnedBtn">✓ Yodlangan</button>
+        </div>
+      </div>
+
+      <div class="card-box" id="cardBox" title="Tarjimasini ko'rish uchun bosing">
+        <div class="card-tag" id="cardSideLabel">INGLIZCHA</div>
+        <div class="card-main" id="cardMainText">Hali so'z yo'q</div>
+        <div class="card-sub" id="cardSubText">Chapdagi forma yoki fayl orqali so'z qo'shing</div>
+      </div>
+
+      <div class="btn-row" style="justify-content: center;">
+        <button type="button" class="btn-secondary" id="prevBtn">← Oldingi</button>
+        <button type="button" class="btn-primary" id="flipBtn">Aylantirish</button>
+        <button type="button" class="btn-secondary" id="nextBtn">Keyingi →</button>
+        <button type="button" class="btn-secondary" id="shuffleBtn">🔀 Aralashtirish</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <h2 style="margin: 0;">Barcha so'zlar</h2>
+        <div class="btn-row" style="margin: 0;">
+          <input type="text" id="searchInput" placeholder="Qidirish..." style="width: 190px; padding: 7px 10px;" />
+          <select id="filterSelect" style="width: 150px; padding: 7px 10px;">
+            <option value="all">Barchasi</option>
+            <option value="unlearned">Yodlanmagan</option>
+            <option value="learned">Yodlangan</option>
+          </select>
+          <button type="button" class="btn-danger" id="clearAllBtn">Barchasini o'chirish</button>
+        </div>
+      </div>
+      <div class="word-list" id="wordList"></div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "uz_en_flashcards_netlify_v1";
+    const DB_NAME = "FlashcardsNetlifyDB";
+    const STORE_NAME = "cardsStore";
+
+    let cards = [];
+    let currentIndex = 0;
+    let isFlipped = false;
+    let pendingImport = [];
+
+    const els = {
+      saveStatus: document.getElementById("saveStatus"),
+      statTotal: document.getElementById("statTotal"),
+      statLearned: document.getElementById("statLearned"),
+      statRemaining: document.getElementById("statRemaining"),
+      addWordForm: document.getElementById("addWordForm"),
+      enInput: document.getElementById("enInput"),
+      uzInput: document.getElementById("uzInput"),
+      exampleInput: document.getElementById("exampleInput"),
+      dropzone: document.getElementById("dropzone"),
+      fileInput: document.getElementById("fileInput"),
+      sampleBtn: document.getElementById("sampleBtn"),
+      exportBtn: document.getElementById("exportBtn"),
+      applyImportBtn: document.getElementById("applyImportBtn"),
+      previewBox: document.getElementById("previewBox"),
+      cardCounter: document.getElementById("cardCounter"),
+      cardBox: document.getElementById("cardBox"),
+      cardSideLabel: document.getElementById("cardSideLabel"),
+      cardMainText: document.getElementById("cardMainText"),
+      cardSubText: document.getElementById("cardSubText"),
+      speakBtn: document.getElementById("speakBtn"),
+      toggleLearnedBtn: document.getElementById("toggleLearnedBtn"),
+      prevBtn: document.getElementById("prevBtn"),
+      flipBtn: document.getElementById("flipBtn"),
+      nextBtn: document.getElementById("nextBtn"),
+      shuffleBtn: document.getElementById("shuffleBtn"),
+      searchInput: document.getElementById("searchInput"),
+      filterSelect: document.getElementById("filterSelect"),
+      clearAllBtn: document.getElementById("clearAllBtn"),
+      wordList: document.getElementById("wordList"),
+      toast: document.getElementById("toast")
+    };
+
+    function showToast(msg) {
+      els.toast.textContent = msg;
+      els.toast.classList.add("show");
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => {
+        els.toast.classList.remove("show");
+      }, 2200);
+    }
+
+    function openIDB() {
+      return new Promise((resolve, reject) => {
+        if (!("indexedDB" in window)) return resolve(null);
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function readFromIDB() {
+      try {
+        const db = await openIDB();
+        if (!db) return null;
+        return new Promise((resolve) => {
+          const tx = db.transaction(STORE_NAME, "readonly");
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.get("cards");
+          req.onsuccess = () => resolve(Array.isArray(req.result) ? req.result : null);
+          req.onerror = () => resolve(null);
+        });
+      } catch {
+        return null;
+      }
+    }
+
+    async function writeToIDB(data) {
+      try {
+        const db = await openIDB();
+        if (!db) return;
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        tx.objectStore(STORE_NAME).put(data, "cards");
+      } catch {}
+    }
+
+    function readFromLocalStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function writeToLocalStorage(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch {}
+    }
+
+    async function saveCards() {
+      writeToLocalStorage(cards);
+      await writeToIDB(cards);
+      els.saveStatus.textContent = "✓ Xotirada saqlandi (" + cards.length + ")";
+    }
+
+    async function loadCards() {
+      const lsCards = readFromLocalStorage();
+      const idbCards = await readFromIDB();
+
+      if (lsCards && lsCards.length > 0) {
+        cards = lsCards;
+        await writeToIDB(cards);
+      } else if (idbCards && idbCards.length > 0) {
+        cards = idbCards;
+        writeToLocalStorage(cards);
+      } else {
+        cards = [];
+      }
+
+      currentIndex = 0;
+      isFlipped = false;
+      renderAll();
+      els.saveStatus.textContent = "✓ Xotirada saqlandi (" + cards.length + ")";
+    }
+
+    function parseLineToPair(line) {
+      const trimmed = line.trim();
+      if (!trimmed) return null;
+
+      const multiSpaceMatch = trimmed.match(/^(.+?)(?:\t+|\s{2,})(.+)$/);
+      if (multiSpaceMatch) {
+        return {
+          en: multiSpaceMatch[1].trim(),
+          uz: multiSpaceMatch[2].trim()
+        };
+      }
+
+      const delimMatch = trimmed.match(/^(.+?)(?:\s+[-–—]\s+|[,;])\s*(.+)$/);
+      if (delimMatch) {
+        return {
+          en: delimMatch[1].trim(),
+          uz: delimMatch[2].trim()
+        };
+      }
+
+      return null;
+    }
+
+    function parseFileContent(text) {
+      const lines = text.split(/\r?\n/);
+      const parsed = [];
+      for (const line of lines) {
+        const pair = parseLineToPair(line);
+        if (pair && pair.en && pair.uz) {
+          if (pair.en.toLowerCase() === "english" && pair.uz.toLowerCase() === "uzbek") {
+            continue;
+          }
+          parsed.push({
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+            en: pair.en,
+            uz: pair.uz,
+            example: "",
+            learned: false
+          });
+        }
+      }
+      return parsed;
+    }
+
+    function renderPreview(items) {
+      pendingImport = items;
+      if (!items.length) {
+        els.previewBox.style.display = "block";
+        els.previewBox.innerHTML = "<div class='hint'>Mos keluvchi qator topilmadi. Format: <code>apple                 olma</code></div>";
+        els.applyImportBtn.style.display = "none";
+        return;
+      }
+
+      els.previewBox.style.display = "block";
+      els.applyImportBtn.style.display = "inline-block";
+      els.previewBox.innerHTML =
+        `<div class="hint" style="margin-bottom:6px;">Topildi: <strong>${items.length}</strong> ta so'z</div>` +
+        items.slice(0, 25).map(item =>
+          `<div class="preview-item"><span><strong>${escapeHtml(item.en)}</strong></span><span>${escapeHtml(item.uz)}</span></div>`
+        ).join("") +
+        (items.length > 25 ? `<div class="hint">...va yana ${items.length - 25} ta so'z</div>` : "");
+    }
+
+    function handleFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = String(e.target.result || "");
+        renderPreview(parseFileContent(text));
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function renderStats() {
+      const total = cards.length;
+      const learned = cards.filter(c => c.learned).length;
+      const remaining = total - learned;
+      els.statTotal.textContent = total;
+      els.statLearned.textContent = learned;
+      els.statRemaining.textContent = remaining;
+    }
+
+    function renderFlashcard() {
+      if (!cards.length) {
+        els.cardCounter.textContent = "Karta 0 / 0";
+        els.cardSideLabel.textContent = "BO'SH";
+        els.cardMainText.textContent = "Hali so'z yo'q";
+        els.cardSubText.textContent = "Yangi so'z qo'shing yoki .txt fayl yuklang";
+        els.toggleLearnedBtn.textContent = "✓ Yodlangan";
+        return;
+      }
+
+      if (currentIndex >= cards.length) currentIndex = 0;
+      if (currentIndex < 0) currentIndex = cards.length - 1;
+
+      const card = cards[currentIndex];
+      els.cardCounter.textContent = `Karta ${currentIndex + 1} / ${cards.length}`;
+      els.toggleLearnedBtn.textContent = card.learned ? "✓ Yodlangan (Belgilangan)" : "✓ Yodlangan";
+
+      if (!isFlipped) {
+        els.cardSideLabel.textContent = "INGLIZCHA";
+        els.cardMainText.textContent = card.en;
+        els.cardSubText.textContent = card.learned ? "Yodlangan • Tarjimasini ko'rish uchun bosing" : "Tarjimasini ko'rish uchun bosing";
+      } else {
+        els.cardSideLabel.textContent = "O'ZBEKCHA TARJIMA";
+        els.cardMainText.textContent = card.uz;
+        els.cardSubText.textContent = card.example ? `Misol: ${card.example}` : `Asl so'z: ${card.en}`;
+      }
+    }
+
+    function renderWordList() {
+      const q = els.searchInput.value.trim().toLowerCase();
+      const filter = els.filterSelect.value;
+
+      const filtered = cards.filter(c => {
+        const matchesQuery = !q || c.en.toLowerCase().includes(q) || c.uz.toLowerCase().includes(q);
+        const matchesFilter =
+          filter === "all" ||
+          (filter === "learned" && c.learned) ||
+          (filter === "unlearned" && !c.learned);
+        return matchesQuery && matchesFilter;
+      });
+
+      if (!filtered.length) {
+        els.wordList.innerHTML = `<p class="hint">Ko'rsatish uchun so'z topilmadi.</p>`;
+        return;
+      }
+
+      els.wordList.innerHTML = filtered.map(c => {
+        const realIdx = cards.findIndex(item => item.id === c.id);
+        return `
+          <div class="word-item ${c.learned ? "learned" : ""}">
+            <div>
+              <div class="word-en">${escapeHtml(c.en)}</div>
+              <div class="word-uz">${escapeHtml(c.uz)}</div>
+              ${c.example ? `<div class="word-meta" style="margin-top:4px;">${escapeHtml(c.example)}</div>` : ""}
+            </div>
+            <div class="btn-row" style="margin-top:4px;">
+              <button type="button" class="btn-secondary" onclick="selectCard(${realIdx})">Ko'rish</button>
+              <button type="button" class="btn-secondary" onclick="toggleCardLearned('${c.id}')">${c.learned ? "Qaytarish" : "Yodladim"}</button>
+              <button type="button" class="btn-danger" onclick="deleteCard('${c.id}')">O'chirish</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderAll() {
+      renderStats();
+      renderFlashcard();
+      renderWordList();
+    }
+
+    window.selectCard = function(idx) {
+      currentIndex = idx;
+      isFlipped = false;
+      renderFlashcard();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.toggleCardLearned = async function(id) {
+      const target = cards.find(c => c.id === id);
+      if (!target) return;
+      target.learned = !target.learned;
+      await saveCards();
+      renderAll();
+    };
+
+    window.deleteCard = async function(id) {
+      cards = cards.filter(c => c.id !== id);
+      await saveCards();
+      renderAll();
+      showToast("So'z o'chirildi");
+    };
+
+    els.addWordForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const en = els.enInput.value.trim();
+      const uz = els.uzInput.value.trim();
+      const example = els.exampleInput.value.trim();
+      if (!en || !uz) return;
+
+      cards.unshift({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+        en,
+        uz,
+        example,
+        learned: false
+      });
+
+      currentIndex = 0;
+      isFlipped = false;
+      await saveCards();
+      renderAll();
+
+      els.addWordForm.reset();
+      els.enInput.focus();
+      showToast("Yangi so'z saqlandi");
+    });
+
+    els.dropzone.addEventListener("click", () => els.fileInput.click());
+    els.fileInput.addEventListener("change", (e) => handleFile(e.target.files[0]));
+
+    els.dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      els.dropzone.classList.add("dragover");
+    });
+    els.dropzone.addEventListener("dragleave", () => els.dropzone.classList.remove("dragover"));
+    els.dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      els.dropzone.classList.remove("dragover");
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    els.applyImportBtn.addEventListener("click", async () => {
+      if (!pendingImport.length) return;
+      cards = [...pendingImport, ...cards];
+      pendingImport = [];
+      els.previewBox.style.display = "none";
+      els.applyImportBtn.style.display = "none";
+      els.fileInput.value = "";
+      currentIndex = 0;
+      isFlipped = false;
+      await saveCards();
+      renderAll();
+      showToast("Fayldagi so'zlar saqlandi");
+    });
+
+    els.sampleBtn.addEventListener("click", () => {
+      const sampleText = [
+        "apple                 olma",
+        "book                  kitob",
+        "knowledge             bilim",
+        "journey               sayohat"
+      ].join("\n");
+      const blob = new Blob([sampleText], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "namuna-sozlar.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    els.exportBtn.addEventListener("click", () => {
+      if (!cards.length) {
+        showToast("Eksport qilish uchun so'z yo'q");
+        return;
+      }
+      const lines = cards.map(c => `${c.en.padEnd(22, " ")}${c.uz}`);
+      const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "flashcard-sozlar.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("So'zlar .txt faylga eksport qilindi");
+    });
+
+    els.cardBox.addEventListener("click", () => {
+      if (!cards.length) return;
+      isFlipped = !isFlipped;
+      renderFlashcard();
+    });
+
+    els.flipBtn.addEventListener("click", () => {
+      if (!cards.length) return;
+      isFlipped = !isFlipped;
+      renderFlashcard();
+    });
+
+    els.prevBtn.addEventListener("click", () => {
+      if (!cards.length) return;
+      currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+      isFlipped = false;
+      renderFlashcard();
+    });
+
+    els.nextBtn.addEventListener("click", () => {
+      if (!cards.length) return;
+      currentIndex = (currentIndex + 1) % cards.length;
+      isFlipped = false;
+      renderFlashcard();
+    });
+
+    els.shuffleBtn.addEventListener("click", async () => {
+      if (cards.length < 2) return;
+      for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+      }
+      currentIndex = 0;
+      isFlipped = false;
+      await saveCards();
+      renderAll();
+      showToast("Kartalar aralashtirildi");
+    });
+
+    els.toggleLearnedBtn.addEventListener("click", async () => {
+      if (!cards.length) return;
+      cards[currentIndex].learned = !cards[currentIndex].learned;
+      await saveCards();
+      renderAll();
+    });
+
+    els.speakBtn.addEventListener("click", () => {
+      if (!cards.length || !("speechSynthesis" in window)) return;
+      const utter = new SpeechSynthesisUtterance(cards[currentIndex].en);
+      utter.lang = "en-US";
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+    });
+
+    els.searchInput.addEventListener("input", renderWordList);
+    els.filterSelect.addEventListener("change", renderWordList);
+
+    els.clearAllBtn.addEventListener("click", async () => {
+      if (!cards.length) return;
+      if (!confirm("Barcha saqlangan so'zlarni o'chirishni xohlaysizmi?")) return;
+      cards = [];
+      currentIndex = 0;
+      isFlipped = false;
+      await saveCards();
+      renderAll();
+      showToast("Barcha so'zlar tozalandi");
+    });
+
+    loadCards();
+  </script>
+</body>
+</html>
